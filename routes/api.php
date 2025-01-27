@@ -9,7 +9,7 @@ use App\Http\Controllers\LoginController;
 
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 
-Route::group(['middleware' => 'auth:sanctum'], function () {    
+Route::group(['middleware' => 'auth:api'], function () {    
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/user/current', [UserController::class, 'authUser'])->name('user.current');
     Route::post('/refresh', [LoginController::class, 'refresh'])->name('refresh');

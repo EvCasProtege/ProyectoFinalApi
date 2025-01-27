@@ -5,41 +5,41 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Helpers\ResponseHelper;
 
 class LoginController extends Controller
 {
     public function login(Request $request)
     {
-        try{
-
+        try {
             $request->validate([
                 'email' => 'required|string|email',
                 'password' => 'required|string|min:8'
             ]);
 
-            //Extraigo las credenciales del request
-            $credentials = $request->only('email','password');
+            $credentials = $request->only('email', 'password');
 
-            if(!Auth::attempt($credentials) ){
-                throw new Exception('Invalid credentials');
+            if (!$token = JWTAuth::attempt($credentials)) {
+                throw new \Exception('Invalid credentials');
             }
 
-            $user = $request->user();
+            $user = Auth::user();
+            $expiration = JWTAuth::factory()->getTTL() * 60;
+            $time = now()->addSeconds($expiration);
 
-            $token = $user->createToken('auth_token')->plainTextToken;
-            $expiration = Carbon::now()->addMinutes(config('sanctum.expiration'));
-
-            return ResponseHelper::formatResponse(200,"Succes",[
+            return ResponseHelper::formatResponse(200, "Success", [
                 'user' => $user,
                 'token' => $token,
                 'token_type' => 'Bearer',
-                'expires_at' => $expiration->toDateTimeString()
+                'time_server' => now()->toDateTimeString(),
+                'expires_at_human' => $time->toDateTimeString(),
+                'expires_at' => $time->timestamp
+
             ]);
 
-        }catch(Exception $error){
-            return  ResponseHelper::formatResponse(400,"Error",[
+        } catch (\Exception $error) {
+            return ResponseHelper::formatResponse(400, "Error", [
                 'error' => $error->getMessage()
             ]);
         }
@@ -47,44 +47,36 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        try{
-            // Revocar el token actual del usuario
-            // $request->user()->currentAccessToken()->delete();
-            auth()->user()->tokens()->delete();
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
 
-            $request->session()->invalidate();
-
-            return ResponseHelper::formatResponse(200,"Succes",[
+            return ResponseHelper::formatResponse(200, "Success", [
                 'message' => 'User logged out successfully'
             ]);
-        }catch(Exception $error){
-        return ResponseHelper::formatResponse(400,"Error",[
-            'error' => $error->getMessage()
-        ], 400);
-    };
-
+        } catch (\Exception $error) {
+            return ResponseHelper::formatResponse(400, "Error", [
+                'error' => $error->getMessage()
+            ]);
+        }
     }
 
     public function refresh(Request $request)
     {
-        try{
-            $user = $request->user();
+        try {
+            $newToken = JWTAuth::refresh(JWTAuth::getToken());
+            $expiration = JWTAuth::factory()->getTTL() * 60;
+            $time = now()->addSeconds($expiration);
 
-            $user->tokens()->delete();
-
-            $token = $user->createToken('auth_token')->plainTextToken;
-            
-            $expiration = Carbon::now()->addMinutes(config('sanctum.expiration'));
-
-            return ResponseHelper::formatResponse(200,"Succes",[
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_at' => $expiration->toDateTimeString()
+            return ResponseHelper::formatResponse(200, "Success", [
+                'token' => $newToken,
+                'token_type' => 'Bearer',  
+                'time_server' => now(),        
+                'expires_at_human' => $time->toDateTimeString(),
+                'expires_at' => $time->timestamp
             ]);
 
-        }catch(Exception $error){
-            return ResponseHelper::formatResponse(400,"Succes",[
+        } catch (\Exception $error) {
+            return ResponseHelper::formatResponse(400, "Error", [
                 'error' => $error->getMessage()
             ]);
         }
