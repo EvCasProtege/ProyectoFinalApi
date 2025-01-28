@@ -16,12 +16,12 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/users/reviews', [UserReviewController::class, 'index'])->name('users.reviews.index');
     Route::post('/users/reviews/{product}', [UserReviewController::class, 'store'])->name('user.reviews.store');
     Route::apiResource('users', UserController::class);
-    Route::apiResource('products', ProductController::class)->except(['index']);
+    Route::apiResource('products', ProductController::class)->except(['index', 'show']);
     Route::apiResource('reviews', ReviewController::class);
 });
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
 
 
