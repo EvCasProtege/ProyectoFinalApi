@@ -19,6 +19,8 @@ class ProductFactory extends Factory
         return [
             'name'=> $this->faker->word,
             'price'=> $this->faker->randomFloat(2, 1, 1000),
+            'url'=> 'https://placehold.co/600x400.png',
+            'description'=> $this->faker->sentence,
         ];
     }
 }
