@@ -15,7 +15,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/refresh', [LoginController::class, 'refresh'])->name('refresh');
     Route::get('/users/reviews', [UserReviewController::class, 'index'])->name('users.reviews.index');
     Route::post('/users/reviews/{product}', [UserReviewController::class, 'store'])->name('user.reviews.store');
-    Route::apiResource('users', UserController::class);
+    Route::apiResource('users', UserController::class)->except(['store','show']);
     Route::apiResource('products', ProductController::class)->except(['index', 'show']);
     Route::apiResource('reviews', ReviewController::class);
 });
@@ -23,6 +23,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
+Route::post('/users', [UserController::class, 'store'])->name('users.store');
+Route::get('/users/{user}',[UserController::class, 'show'])->name('users.show');
 
 
 

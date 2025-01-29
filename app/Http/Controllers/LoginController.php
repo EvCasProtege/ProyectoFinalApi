@@ -6,6 +6,7 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Carbon\Carbon;
 use App\Helpers\ResponseHelper;
 
 class LoginController extends Controller
@@ -25,15 +26,15 @@ class LoginController extends Controller
             }
 
             $user = Auth::user();
-            $expiration = JWTAuth::factory()->getTTL() * 60;
-            $time = now()->addSeconds($expiration);
+            $expiration = $this->getIntegerExpiration() * 60;
+            $time = Carbon::now()->addSeconds($expiration)->setTimezone('America/El_Salvador');
 
             return ResponseHelper::formatResponse(200, "Success", [
                 'user' => $user,
                 'token' => $token,
                 'token_type' => 'Bearer',
-                'time_server' => now()->toDateTimeString(),
-                'expires_at_human' => $time->toDateTimeString(),
+                'time_server' => Carbon::now()->setTimezone('America/El_Salvador')->format('d/m/Y H:i:s'),
+                'expires_at_human' => $time->format('d/m/Y H:i:s'),
                 'expires_at' => $time->timestamp
 
             ]);
@@ -64,14 +65,14 @@ class LoginController extends Controller
     {
         try {
             $newToken = JWTAuth::refresh(JWTAuth::getToken());
-            $expiration = JWTAuth::factory()->getTTL() * 60;
-            $time = now()->addSeconds($expiration);
+            $expiration = $this->getIntegerExpiration()  * 60;
+            $time = Carbon::now()->addSeconds($expiration)->setTimezone('America/El_Salvador');
 
             return ResponseHelper::formatResponse(200, "Success", [
                 'token' => $newToken,
                 'token_type' => 'Bearer',  
-                'time_server' => now(),        
-                'expires_at_human' => $time->toDateTimeString(),
+                'time_server' => Carbon::now()->setTimezone('America/El_Salvador')->format('d/m/Y H:i:s'),        
+                'expires_at_human' => $time->format('d/m/Y H:i:s'),
                 'expires_at' => $time->timestamp
             ]);
 
@@ -80,5 +81,14 @@ class LoginController extends Controller
                 'error' => $error->getMessage()
             ]);
         }
+    }
+
+    private function getIntegerExpiration(){
+        $experation = 1;
+        $integerE = JWTAuth::factory()->getTTL();
+        if($integerE - 1 >0 ){
+            $experation = $integerE - 1;
+        }
+        return $experation;
     }
 }
