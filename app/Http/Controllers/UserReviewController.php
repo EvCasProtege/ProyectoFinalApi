@@ -13,6 +13,7 @@ class UserReviewController extends Controller
 {
 
     //save or update review for a user
+    // only the user who created the review can update it
     public function store(StoreUserReviewProductRequest $request, Product $product)
     {
         $user = auth()->user();
@@ -32,6 +33,7 @@ class UserReviewController extends Controller
     
 
     // get all reviews with product for a authenticated user
+    // only the user who created the review can see it
     public function index()
     {
         $user = auth()->user();
@@ -40,6 +42,7 @@ class UserReviewController extends Controller
     }
 
     // delete review for a user
+    // only the user who created the review can delete it
     public function destroy(Review $review)
     {
         $user = auth()->user();

@@ -58,6 +58,9 @@ class UserController extends Controller
         return ResponseHelper::formatResponse(204,"Succes",null);
     }
 
+    /**
+     * Get the authenticated user
+     */
     public function authUser()
     {
         return ResponseHelper::formatResponse(200,"Succes",auth()->user());

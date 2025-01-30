@@ -66,6 +66,10 @@ class ProductController extends Controller
         return ResponseHelper::formatResponse(200,"Succes",$product);
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
+
     public function destroy(Product $product)
     {
         $product->delete();

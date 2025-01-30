@@ -11,6 +11,11 @@ use App\Helpers\ResponseHelper;
 
 class LoginController extends Controller
 {
+    /**
+     * Login a user
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request)
     {
         try {
@@ -26,6 +31,7 @@ class LoginController extends Controller
             }
 
             $user = Auth::user();
+            // get the expiration time in minutes
             $expiration = $this->getIntegerExpiration() * 60;
             $time = Carbon::now()->addSeconds($expiration)->setTimezone('America/El_Salvador');
 
@@ -46,9 +52,15 @@ class LoginController extends Controller
         }
     }
 
+    /**
+     * Logout a user
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request)
     {
         try {
+            // invalidate the token
             JWTAuth::invalidate(JWTAuth::getToken());
 
             return ResponseHelper::formatResponse(200, "Success", [
@@ -61,10 +73,16 @@ class LoginController extends Controller
         }
     }
 
+    /**
+     * Refresh the token
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function refresh(Request $request)
     {
         try {
             $newToken = JWTAuth::refresh(JWTAuth::getToken());
+            // get the expiration time in minutes
             $expiration = $this->getIntegerExpiration()  * 60;
             $time = Carbon::now()->addSeconds($expiration)->setTimezone('America/El_Salvador');
 
@@ -83,6 +101,10 @@ class LoginController extends Controller
         }
     }
 
+    /**
+     * Get the expiration time in minutes
+     * @return int
+     */
     private function getIntegerExpiration(){
         $experation = 1;
         $integerE = JWTAuth::factory()->getTTL();
